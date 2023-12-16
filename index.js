@@ -36,7 +36,11 @@ app.get("/success",(req,res)=>{
     res.render("success");
 })
 
-app.post("/",(req,res)=>{
+app.get("/users",(req,res)=>{
+    res.json({details});
+})
+
+app.post("/contact",(req,res)=>{
     console.log(req.body.name);
 
     details.push({username:req.body.name,email:req.body.email});
