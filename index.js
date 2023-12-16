@@ -65,9 +65,9 @@ app.get("/users", (req, res) => {
 app.post("/contact", async (req, res) => {
     console.log(req.body.name);
 
-    const data={ name: req.body.name, email: req.body.email };
+    const {name,email} =req.body;
     // res.render("sucess");  //render success file in videw folder after submit
-    await msg.create(data);
+    await msg.create({name,email });
     res.redirect("/success");
 })
 
