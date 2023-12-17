@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
+import Jwt  from "jsonwebtoken";
 
 
 const app = express();
@@ -10,15 +11,16 @@ mongoose.connect("mongodb://localhost:27017", {
     dbName: "backend",
 }).then(() => console.log("dataBase connected")).catch((e) => console.log(e));
 
-const messageSchema= new mongoose.Schema({
+const userSchema= new mongoose.Schema({
     name:String,
     email:String
 });
 
-const msg=mongoose.model("Message",messageSchema)
+const User=mongoose.model("User",userSchema)
 
 
 // const details = [];
+
 
 //using middleware
 app.use(express.static(path.join(path.resolve(), "public")));    // making static public folder for use
@@ -49,9 +51,9 @@ app.set("view engine", "ejs");          //setting up view engine for rending wit
 //     // res.sendFile("index");
 // });
 
-app.get("/success", (req, res) => {
-    res.render("success");
-})
+// app.get("/success", (req, res) => {
+//     res.render("success");
+// })
 
 // app.get("/add", async (req, res) => {
 //     await msg.create({name:"avde",email:"abcaaaa@gmail.com"}).then(()=>{
@@ -62,40 +64,57 @@ app.get("/success", (req, res) => {
 
 // })
 
-app.get("/users", (req, res) => {
-    res.json({ details });
-})
+// app.get("/users", (req, res) => {
+//     res.json({ details });
+// })
 
-app.post("/contact", async (req, res) => {
-    console.log(req.body.name);
+// app.post("/contact", async (req, res) => {
+//     console.log(req.body.name);
 
-    const {name,email} =req.body;
-    // res.render("sucess");  //render success file in videw folder after submit
-    await msg.create({name,email });
-    res.redirect("/success");
-})
+//     const {name,email} =req.body;
+//     // res.render("sucess");  //render success file in videw folder after submit
+//     await msg.create({name,email });
+//     res.redirect("/success");
+// })
 
 
 //authentication start form here 
 
-app.get("/", (req, res) => {
 
-    // console.log(req.cookies.token);                   // this show token in console
 
+//fuction for authentication
+// here next work for commit to execute next command in row
+const isAuthenticated=(req,res,next)=>{
     const {token}=req.cookies;
 
     if(token){
-        res.render("logout");
+        next();
     }else{
         res.render("login");
     }
-     
-    
+}
+
+app.get("/",isAuthenticated ,(req, res) => {
+
+    // console.log(req.cookies.token);                   // this show token in console
+
+    res.render("logout")
 });
 
-app.post("/login",(req,res)=>{
+app.post("/login",async(req,res)=>{
 
-    res.cookie("token","logged_inn",{
+    const {name,email}=req.body;
+    console.log(name,email);
+
+    const user=await User.create({
+        name,
+        email,
+    })
+
+    const token=Jwt.sign({_id:user._id},"rydtsfyuidfuwe")
+    console.log(token);
+
+    res.cookie("token",token,{
         httpOnly:true,
         expires:new Date(Date.now()+60*1000),
     });
