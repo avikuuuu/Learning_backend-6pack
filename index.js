@@ -129,7 +129,6 @@ app.post("/logout",(req,res)=>{
         expires:new Date(Date.now()),
     });
     res.redirect("/");
-
 })
 
 app.listen(5000, () => {
